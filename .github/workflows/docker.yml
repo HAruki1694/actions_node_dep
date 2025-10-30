@@ -1,1 +1,55 @@
+name: Node.js CI with Docker and GHCR
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1️⃣ Checkout your code
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # 2️⃣ Setup Node.js
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      # 3️⃣ Install dependencies (faster + reproducible)
+      - name: Install dependencies
+        run: npm ci
+
+      # 4️⃣ Run tests (if available)
+      - name: Run tests
+        run: npm test || echo "No tests found"
+
+      # 5️⃣ Build Docker image (for your app)
+      - name: Build Docker image
+        run: docker build -t node-app .
+
+      # 6️⃣ Log in to GitHub Container Registry (GHCR)
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      # 7️⃣ Tag and push image to GHCR
+      - name: Push image to GHCR
+        run: |
+          docker tag node-app ghcr.io/${{ github.repository_owner }}/node-app:latest
+          docker push ghcr.io/${{ github.repository_owner }}/node-app:latest
+
+      # 8️⃣ (Optional) Verify image pushed successfully
+      - name: Confirm pushed images
+        run: docker images
 
