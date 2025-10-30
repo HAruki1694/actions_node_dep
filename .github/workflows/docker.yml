@@ -46,10 +46,12 @@ jobs:
       # 7️⃣ Tag and push image to GHCR
       - name: Push image to GHCR
         run: |
-          docker tag node-app ghcr.io/${{ github.repository_owner }}/node-app:latest
-          docker push ghcr.io/${{ github.repository_owner }}/node-app:latest
+          OWNER=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
+          docker tag node-app ghcr.io/$OWNER/node-app:latest
+          docker push ghcr.io/$OWNER/node-app:latest
 
       # 8️⃣ (Optional) Verify image pushed successfully
       - name: Confirm pushed images
         run: docker images
+
 
