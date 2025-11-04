@@ -12,8 +12,7 @@ Before you get started, make sure you have the following:
 
 ## Deployment Steps
 
-### Step 1: Prepare Your Project
-
+### step 1 
 Ensure your Express.js project is set up correctly locally. Create a `.gitignore` file in the root of your project to exclude unnecessary files from being included in version control.
 
 ### Step 2: Update Configuration Files
