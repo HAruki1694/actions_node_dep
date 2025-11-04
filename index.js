@@ -21,7 +21,7 @@ app.get("/:name", (req, res) => {
 });
 
 app.get("/", (req, res) => {
-  res.send(`wanna br your , do i wanna know ,lover ,blank sapce,nothing holding me back`);
+  res.send(`wanna br your , do i wanna know ,lover ,blank sapce,nothing holding me back,stay,ur memory is extecy`);
 });
 
 app.use((req, res, next) => {
