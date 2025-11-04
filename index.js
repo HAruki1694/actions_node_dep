@@ -21,7 +21,7 @@ app.get("/:name", (req, res) => {
 });
 
 app.get("/", (req, res) => {
-  res.send(`baby u light up my world like nobuddy else the way that u flip ur hair gets me overwhemeled ..but when u smile at the ground aint it hard to tell u dont know ohh ohh `);
+  res.send(`wanna br your , do i wanna know ,lover ,blank sapce,nothing holding me back`);
 });
 
 app.use((req, res, next) => {
