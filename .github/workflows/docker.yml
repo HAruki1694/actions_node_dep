@@ -47,11 +47,12 @@ jobs:
       run: |
         kubectl apply -f deploy.yaml
         kubectl apply -f service.yaml
-        kubectl rollout status deployment/your-deployment-name
+        
 
     - name: Display Service Information
       run: |
         echo "--- Kubernetes Service Status ---"
         # This command's output will automatically appear in the 
+
 
 
