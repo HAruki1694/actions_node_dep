@@ -1,67 +1,55 @@
-name: Node.js CI with Docker and GHCR
+name: Build, Push, and Deploy 'latest' Docker Image to EKS
 
 on:
   push:
     branches:
       - main
-  pull_request:
-    branches:
-      - main
 
 jobs:
-  build:
+  build-and-push:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+    - name: Checkout code
+      uses: actions/checkout@v3
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 18
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v3
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ secrets.AWS_REGION }}
 
-      - name: Install dependencies
-        run: npm ci
+    - name: Login to Amazon ECR
+      id: login-ecr
+      uses: aws-actions/amazon-ecr-login@v2
 
-      - name: Run tests
-        run: npm test || echo "No tests found"
+    - name: Build, tag, and push image to Amazon ECR
+      env:
+        ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY_URI }}
+        IMAGE_TAG: latest
+      run: |
+        docker build -t $ECR_REPOSITORY:$IMAGE_TAG .
+        docker push $ECR_REPOSITORY:$IMAGE_TAG
 
-      - name: Build Docker image
-        run: docker build -t node-app .
+    # --- Deployment Steps ---
+    
+    - name: Install kubectl
+      uses: azure/setup-kubectl@v3
+      with:
+        version: 'v1.28.0' 
 
-      - name: Log in to GitHub Container Registry
-        uses: docker/login-action@v3
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+    - name: Update Kubeconfig for EKS
+      run: |
+        aws eks update-kubeconfig --name <YOUR_EKS_CLUSTER_NAME> --region ${{ secrets.AWS_REGION }}
+      
+    - name: Deploy application to Kubernetes
+      run: |
+        kubectl apply -f deployment.yaml
+        kubectl apply -f service.yaml
+        kubectl rollout status deployment/your-deployment-name
 
-      - name: Push image to GHCR
-        run: |
-          OWNER=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
-          docker tag node-app ghcr.io/$OWNER/node-app:latest
-          docker push ghcr.io/$OWNER/node-app:latest
-
-      - name: Confirm pushed images
-        run: docker images
-
-  #  🔥 NEW JOB — RUNS IN YOUR LOCAL MACHINE
-  run-locally:
-    needs: build              # waits for CI build first
-    runs-on: self-hosted      # this is your local PC
-    steps:
-      - name: Checkout repo
-        uses: actions/checkout@v4
-
-      # Make sure docker compose deploys on your local system
-      - name: Stop old containers
-        run: docker compose down || true
-
-      - name: Pull latest image
-        run: |
-          OWNER=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
-          docker pull ghcr.io/$OWNER/node-app:latest
-
-      - name: Start app with Docker Compose
-        run: docker compose up -d
+    - name: Display Service Information
+      run: |
+        echo "--- Kubernetes Service Status ---"
+        # This command's output will automatically appear in the 
