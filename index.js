@@ -21,7 +21,7 @@ app.get("/:name", (req, res) => {
 });
 
 app.get("/", (req, res) => {
-  res.send(`lately i been i been losing sleep dreaming about the things that we could be lately i been i been paraying hard`);
+  res.send(`lately i been i been losing sleep dreaming about the things that we could be lately i been i been paraying hard. updated`);
 });
 
 app.use((req, res, next) => {
