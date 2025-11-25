@@ -1,0 +1,24 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: just-deployment
+  labels:
+    app: just
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: just
+  template:
+    metadata:
+      labels:
+        app: just
+    spec:
+      containers:
+      - name: just
+        image: 964936527915.dkr.ecr.us-east-2.amazonaws.com/testing/nginx:latest
+        ports:
+        - containerPort: 80
+
+
+#kubectl apply -f deploy.yaml
