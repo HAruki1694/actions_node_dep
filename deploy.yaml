@@ -17,6 +17,8 @@ spec:
       containers:
       - name: just
         image: 964936527915.dkr.ecr.us-east-2.amazonaws.com/testing/nginx:latest
+        imagePullPolicy: Always
+
         ports:
         - containerPort: 80
 
