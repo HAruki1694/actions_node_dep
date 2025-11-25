@@ -41,7 +41,7 @@ jobs:
 
     - name: Update Kubeconfig for EKS
       run: |
-        aws eks update-kubeconfig --name <YOUR_EKS_CLUSTER_NAME> --region ${{ secrets.AWS_REGION }}
+        aws eks update-kubeconfig --name demo-cluster --region ${{ secrets.AWS_REGION }}
       
     - name: Deploy application to Kubernetes
       run: |
@@ -53,3 +53,4 @@ jobs:
       run: |
         echo "--- Kubernetes Service Status ---"
         # This command's output will automatically appear in the 
+
