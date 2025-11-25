@@ -1,4 +1,4 @@
-name: Build, Push, and Deploy 'latest' Docker Image to EKS
+name: Automated CI/CD to EKS with Dynamic Tags and Sed
 
 on:
   push:
@@ -6,7 +6,7 @@ on:
       - main
 
 jobs:
-  build-and-push:
+  build-push-and-deploy:
     runs-on: ubuntu-latest
 
     steps:
@@ -24,15 +24,21 @@ jobs:
       id: login-ecr
       uses: aws-actions/amazon-ecr-login@v2
 
-    - name: Build, tag, and push image to Amazon ECR
+    - name: Build and push image to Amazon ECR with unique tag
       env:
-        ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY_URI }}
-        IMAGE_TAG: latest
+        ECR_REPOSITORY_URI: ${{ secrets.ECR_REPOSITORY_URI }}
+        IMAGE_TAG: ${{ github.sha }} # Use commit SHA as a unique tag
       run: |
-        docker build -t $ECR_REPOSITORY:$IMAGE_TAG .
-        docker push $ECR_REPOSITORY:$IMAGE_TAG
+        # Build with unique tag
+        docker build -t $ECR_REPOSITORY_URI:$IMAGE_TAG .
+        # Also tag with 'latest' for convenience
+        docker tag $ECR_REPOSITORY_URI:$IMAGE_TAG $ECR_REPOSITORY_URI:latest
 
-    # --- Deployment Steps ---
+        # Push both tags
+        docker push $ECR_REPOSITORY_URI:$IMAGE_TAG
+        docker push $ECR_REPOSITORY_URI:latest
+
+    # --- Automated Deployment Steps with sed ---
     
     - name: Install kubectl
       uses: azure/setup-kubectl@v3
@@ -41,18 +47,28 @@ jobs:
 
     - name: Update Kubeconfig for EKS
       run: |
+        # Using the cluster name 'demo-cluster' from previous input
         aws eks update-kubeconfig --name demo-cluster --region ${{ secrets.AWS_REGION }}
       
-    - name: Deploy application to Kubernetes
+    - name: Update deploy.yaml using sed and apply
       run: |
-        kubectl apply -f deploy.yaml
-        kubectl apply -f service.yaml
+        NEW_IMAGE_URI="${{ secrets.ECR_REPOSITORY_URI }}:${{ github.sha }}"
+        DEPLOYMENT_FILE="deploy.yaml" # Target your specific deployment file name
+
+        echo "Updating image in $DEPLOYMENT_FILE to $NEW_IMAGE_URI"
+
+        # Use sed to replace the 'image: ...' line with the new image URI and apply the file
+        sed -i "s|image: .*|image: ${NEW_IMAGE_URI}|g" $DEPLOYMENT_FILE
         
+        kubectl apply -f $DEPLOYMENT_FILE
+        kubectl apply -f service.yaml # Apply service file (it doesn't need to change)
+        
+        # !! REPLACE 'your-actual-deployment-name' below with the name from your deploy.yaml !!
+        kubectl rollout status deployment/your-actual-deployment-name 
 
     - name: Display Service Information
       run: |
         echo "--- Kubernetes Service Status ---"
-        # This command's output will automatically appear in the 
-
-
-
+        # This command's output will automatically appear in the GitHub Actions logs.
+        kubectl get services -o wide
+        echo "---------------------------------"
