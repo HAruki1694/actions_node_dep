@@ -64,7 +64,7 @@ jobs:
         kubectl apply -f service.yaml # Apply service file (it doesn't need to change)
         
         # !! REPLACE 'your-actual-deployment-name' below with the name from your deploy.yaml !!
-        kubectl rollout status deployment/your-actual-deployment-name 
+        kubectl rollout status deployment/just-deployment
 
     - name: Display Service Information
       run: |
@@ -72,3 +72,4 @@ jobs:
         # This command's output will automatically appear in the GitHub Actions logs.
         kubectl get services -o wide
         echo "---------------------------------"
+
