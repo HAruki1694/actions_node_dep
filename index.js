@@ -21,7 +21,15 @@ app.get("/:name", (req, res) => {
 });
 
 app.get("/", (req, res) => {
-  res.send(`lately i been i been losing sleep dreaming about the things that we could be lately i been i been paraying hard. updated`);
+  res.send(`
+    lately i been i been losing sleep 
+    dreaming about the things that we could be 
+    <br><br>
+    App Mode     : ${process.env.APP_MODE}     <br>
+    Password     : ${process.env.PASSWORD}     <br>
+    <br>
+    Database URL : ${process.env.DATABASE_URL} <br>
+  `);
 });
 
 app.use((req, res, next) => {
