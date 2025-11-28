@@ -22,7 +22,7 @@ app.get("/:name", (req, res) => {
 
 app.get("/", (req, res) => {
   res.send(`
-    secrest i have held in my heart are harder to hide than i thougt 
+    secrets i have held in my heart are harder to hide than i thougt 
     may be i just wanna be urs!! wanna be urs !!
     <br><br>
     App Mode     : ${process.env.APP_MODE}     <br>
