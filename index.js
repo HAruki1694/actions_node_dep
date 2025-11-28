@@ -22,8 +22,8 @@ app.get("/:name", (req, res) => {
 
 app.get("/", (req, res) => {
   res.send(`
-    lately i been i been losing sleep 
-    dreaming about the things that we could be 
+    secrest i have held in my heart are harder to hide than i thougt 
+    may be i just wanna be urs!! wanna be urs !!
     <br><br>
     App Mode     : ${process.env.APP_MODE}     <br>
     Password     : ${process.env.PASSWORD}     <br>
