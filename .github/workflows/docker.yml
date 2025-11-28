@@ -56,7 +56,8 @@ jobs:
         echo "Updating image in $DEPLOYMENT_FILE to $NEW_IMAGE_URI"
 
         sed -i "s|image: .*|image: ${NEW_IMAGE_URI}|g" $DEPLOYMENT_FILE
-        
+        kubectl apply -f secret.yaml
+        kubectl apply -f configmap.yaml
         kubectl apply -f $DEPLOYMENT_FILE
         kubectl apply -f service.yaml # Apply service file (it doesn't need to change)
        
@@ -67,5 +68,6 @@ jobs:
         echo "--- Kubernetes Service Status ---"
         kubectl get services -o wide
         echo "---------------------------------"
+
 
 
