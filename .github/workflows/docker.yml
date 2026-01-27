@@ -1,73 +1,15 @@
-name: Automated CI/CD to EKS with Dynamic Tags and Sed
+name: Dummy Notify Email Workflow
 
 on:
-  push:
-    branches:
-      - main
+  workflow_dispatch:
 
 jobs:
-  build-push-and-deploy:
+  notify-only:
     runs-on: ubuntu-latest
 
+    notify:
+      email: anandb@aggregate,guruprakash@aggregate
+
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v3
-
-    - name: Configure AWS credentials
-      uses: aws-actions/configure-aws-credentials@v3
-      with:
-        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        aws-region: ${{ secrets.AWS_REGION }}
-
-    - name: Login to Amazon ECR
-      id: login-ecr
-      uses: aws-actions/amazon-ecr-login@v2
-
-    - name: Build and push image to Amazon ECR with unique tag
-      env:
-        ECR_REPOSITORY_URI: ${{ secrets.ECR_REPOSITORY_URI }}
-        IMAGE_TAG: ${{ github.sha }}
-      run: |
-        
-        docker build -t $ECR_REPOSITORY_URI:$IMAGE_TAG .
-       
-        docker tag $ECR_REPOSITORY_URI:$IMAGE_TAG $ECR_REPOSITORY_URI:latest
-
-        docker push $ECR_REPOSITORY_URI:$IMAGE_TAG
-        docker push $ECR_REPOSITORY_URI:latest
-
-
-    
-    - name: Install kubectl
-      uses: azure/setup-kubectl@v3
-      with:
-        version: 'v1.28.0' 
-
-    - name: Update Kubeconfig for EKS
-      run: |
-        aws eks update-kubeconfig --name demo-cluster --region ${{ secrets.AWS_REGION }}
-      
-    - name: Update deploy.yaml using sed and apply
-      run: |
-        NEW_IMAGE_URI="${{ secrets.ECR_REPOSITORY_URI }}:${{ github.sha }}"
-        DEPLOYMENT_FILE="deploy.yaml" # Target your specific deployment file name
-
-        echo "Updating image in $DEPLOYMENT_FILE to $NEW_IMAGE_URI"
-
-        sed -i "s|image: .*|image: ${NEW_IMAGE_URI}|g" $DEPLOYMENT_FILE
-        kubectl apply -f secret.yaml
-        kubectl apply -f configmap.yaml
-        kubectl apply -f $DEPLOYMENT_FILE
-        kubectl apply -f service.yaml # Apply service file (it doesn't need to change)
-       
-        kubectl rollout status deployment/just-deployment
-
-    - name: Display Service Information
-      run: |
-        echo "--- Kubernetes Service Status ---"
-        kubectl get services -o wide
-        echo "---------------------------------"
-
-
-
+      - name: Just echo
+        run: echo "This workflow only tests notify structure"
